@@ -1,0 +1,4 @@
+lookup_plugin:
+  KASPERSKY_API_USERNAME: <Add_your_api_username_here>
+  KASPERSKY_API_PASSWORD: <Add_your_api_path_here>
+  KASPERSKY_API_CERT_PATH: </path/to/your/.pem>
