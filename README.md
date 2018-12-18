@@ -47,20 +47,61 @@ Use the service in manual mode through a web portal or get access by means of a 
 - SaaS solution
 With software as a service (SaaS), there is no need to integrate additional systems or services into your company’s infrastructure. Start using the service immediately.
 
-#### Lookups integrated with Kaspersky Threat Intelligence Portal API
+### PRE-REQUISITES to use Kaspersky Threat Intelligence Portal and DNIF  
+Outbound access required to resolve Kaspersky Threat Intelligence Portal lookup API
 
-#### Retrieve IP address investigation report
+| Protocol   | Source IP  | Source Port  | Direction	 | Destination Domain | Destination Port  |  
+|:------------- |:-------------|:-------------|:-------------|:-------------|:-------------|  
+| TCP | DS,CR,A10 | Any | Egress	| github.com | 443 |
+| TCP | DS,CR,A10 | Any | Egress	| kaspersky.com | 443 |   
 
-The IP address for which you want to retrieve the report
-- input : a valid IPv4 address.
+**Note** A .pem certificate from kaspersky is required 
 
+#### Kaspersky Threat Intelligence Portal(TIP) lookup plugin functions
+
+Details of the functions that can be used with the Kaspersky (TIP) lookup plugin are given in this section  
+[get_ip_report](#get_ip_report)  
+[get_ip_report_file](#get_ip_report_file)  
+[get_url_report](#get_url_report)  
+[get_url_report_file](#get_url_report_file)  
+[get_domain_report](#get_domain_report)  
+[get_domain_report_file](#get_domain_report_file)  
+[get_hash_report](#get_hash_report)  
+
+#### Zone Details
+
+The Zone Details are as follows
+
+ | Zone        | Description  |
+|:------------- |:-------------|
+| Red | The investigated object can be classified as malicious |
+| Grey |  No data is available for the investigated object |
+| Green | The investigated object cannot be classified as malicious|
+| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
+
+#### Note
+
+In all the functions explained below, the examples use an event store named **threatsample**.  
+**This event store does not exist in DNIF by default**. However, it can be created/imported.
+
+ 
+#### get_ip_report
+
+This function returns IP address investigation report
+
+#### Input
+- IPv4 address
+
+#### Example
 ```
 _fetch $SrcIP from threatsample limit 1
 >>_lookup kaspersky get_ip_report $SrcIP
 ```
-###### Sample Output     
-[IP-REPORT](https://www.youtube.com/watch?v=n_h63oJQHCY)  
-The Lookup call returns output in the following structure for available data  
+#### Output
+
+Click [here](https://drive.google.com/open?id=1Vx9GQeelBojDsEX5gbj3QhbvQat4GNJS) to view the output of the above example.  
+ 
+The output of the lookup call has the following structure (for the available data)
 
  | Fields        | Description  |
 |:------------- |:-------------|
@@ -76,7 +117,7 @@ The Lookup call returns output in the following structure for available data
 | $KLIPRange | Range of network that requested IP address belongs to |
 | $KLNetname | Name of network that requested IP address belongs to |
 | $KLNetDescription | Description of network that requested IP address belongs to |
-| $KLZone | Color of the zone that a domain (resolved to the requested IP address) belongs to (red, gray, green) |
+| $KLZone | <ul><li>Color of the zone that a domain (resolved to the requested IP address) belongs to (red, gray, green) </li><li> Refer to the [Zone Details](#zone-details) section for details </li></ul> |
 | $KLASN | Autonomous system number |
 | $KLASDescription | Autonomous system description  |
 
@@ -93,27 +134,22 @@ For instance for role as Owner the data for available fields would be
 | $KLOwnerPhone | Phone details  of the owner present in the IPWHOIS data |
 
 
-#### Retrieve URLs hosted and files downloaded by IP
-The IP address for which you want to retrieve the report
-- input : a valid IPv4 address.
+#### get_ip_report_file
+This function returns URLs hosted by the IP address and files downloaded by the IP address
+#### Input
+- IPv4 address
+#### Example
 ```
 _fetch $SrcIP from threatsample limit 1
->>_lookup kaspersky get_ip_filehostdownload_report $SrcIP
+>>_lookup kaspersky get_ip_report_file $SrcIP
 ```
-###### Sample Output     
-[IP-File-URL-Report](https://www.youtube.com/watch?v=ncV9Jg-dEaM)  
 
-Note
+#### Output
 
-| Zone        | Description  |
-|:------------- |:-------------|
-| Red | The investigated object can be classified as malicious |
-| Grey |  No data is available for the investigated object |
-| Green | The investigated object cannot be classified as malicious|
-| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
+![get_ip_report_file](https://user-images.githubusercontent.com/37173181/50150079-f18e2580-02e2-11e9-9e7e-8aa7a3ca907a.jpg)
+   
 
-
-The Lookup call returns output in the following structure for available data  
+The output of the lookup call has the following structure (for the available data)  
 
 | Fields        | Description  |
 |:------------- |:-------------|
@@ -124,34 +160,25 @@ The Lookup call returns output in the following structure for available data
 | $KLYellowMd5 | List of MD5 hash function of the downloaded file from the queried IP address belonging to Yellow Zone |
 
 
-
-#### Retrieve URL investigation report
-The URL for which you want to retrieve the report
-- input : The URL to be queried
-
+#### get_url_report
+This function returns investigation report for the queried URL
+#### Input
+- URL
+#### Example
 ```
-_fetch $Url from threatsample limit 1
->>_lookup kaspersky get_url_report $Url
+_fetch $URL from threatsample limit 1
+>>_lookup kaspersky get_url_report $URL
 ```
 
-###### Sample Output  
-[URL-Report](https://www.youtube.com/watch?v=kiWyKNyY9UM)  
+#### Output
 
-Note
-
-| Zone        | Description  |
-|:------------- |:-------------|
-| Red | The investigated object can be classified as malicious |
-| Grey |  No data is available for the investigated object |
-| Green | The investigated object cannot be classified as malicious|
-| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
-
-
-The Lookup call returns output in the following structure for available data  
+Click [here](https://drive.google.com/open?id=1q27Y2pz7iDqlwwXLoOd_jR1-BvZAiF5r) to view the output of the above example.  
+ 
+The output of the lookup call has the following structure (for the available data)
 
 | Fields        | Description  |
 |:------------- |:-------------|
-| $KLZone | Color of the zone that queried URL belongs to (red, gray, green) |
+| $KLZone |<ul><li> Color of the zone that queried URL belongs to (red, gray, green)</li><li> Refer to the [Zone Details](#zone-details) section for details </li></ul> |
 | $KLRedUrlReferredTo | URL accessed by the queried URL which belong to Red Zone |
 | $KLGreenUrlReferredTo | URL accessed by the queried URL which belong to Green Zone |
 | $KLGreyUrlReferredTo | URL accessed by the queried URL which belong to Grey Zone |
@@ -198,28 +225,21 @@ For instance for contact type as Technical the data for available fields would b
 | $KLTechnicalState  | State of the Technical contact present in the UrlDomainWhoIs data |
 
 
-#### Retrieve files accessed by URL and files downloaded from URL
-The URL for which you want to retrieve the report
-- input : The URL to be queried
+#### get_url_report_file
+This function returns files accessed by and downloaded from URL
+#### Input
+- URL
+#### Example
 ```
-_fetch $Url from threatsample limit 1
->>_lookup kaspersky get_url_report_file $Url
+_fetch $URL from threatsample limit 1
+>>_lookup kaspersky get_url_report_file $URL
 ```
 
-###### Sample Output  
-[URL-File-Report](https://www.youtube.com/watch?v=YqR3KFJm6Mg)  
+#### Output
 
-Note
-
-| Zone        | Description  |
-|:------------- |:-------------|
-| Red | The investigated object can be classified as malicious |
-| Grey |  No data is available for the investigated object |
-| Green | The investigated object cannot be classified as malicious|
-| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
-
-
-The Lookup call returns output in the following structure for available data  
+Click [here](https://drive.google.com/open?id=1BMdidpGXEe3BIWJOgh_9fPzgbD9XCmWw) to view the output of the above example.  
+ 
+The output of the lookup call has the following structure (for the available data)
 
 | Fields        | Description  |
 |:------------- |:-------------|
@@ -233,29 +253,22 @@ The Lookup call returns output in the following structure for available data
 | $KLYellowFileDownloadedMd5 | List of MD5 hashes of files that were downloaded from the requested URL belonging to Yellow Zone |
 
 
-#### Retrieve Domain investigation report
-The Domain for which you want to retrieve the report
-- input : The Domain to be queried
-
+#### get_domain_report
+This function returns investigation report for queried Domain
+#### Input
+- Domain
+#### Example
 ```
 _fetch $Domain from threatsample limit 1
 >>_lookup kaspersky get_domain_report $Domain
 ```
-###### Sample Output  
-[Domain-Report](https://www.youtube.com/watch?v=JiX2PUABfeg&t=42s)  
 
-Note
+#### Output
 
-| Zone        | Description  |
-|:------------- |:-------------|
-| Red | The investigated object can be classified as malicious |
-| Grey |  No data is available for the investigated object |
-| Green | The investigated object cannot be classified as malicious|
-| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
+Click [here](https://drive.google.com/open?id=1rxtAkp9S0iq5KHHPwdXZ9QQvHsKh9W4J) to view the output of the above example.  
 
-
-The Lookup call returns output in the following structure for available data  
-
+The output of the lookup call has the following structure (for the available data)
+  
 | Fields        | Description  |
 |:------------- |:-------------|
 | $KLCategories | Category of the requested Domain |
@@ -287,7 +300,7 @@ The Lookup call returns output in the following structure for available data
 | $KLRegistrarInfo | Name of the registrar of the domain |
 | $KLRegistrationOrganization | Name of the registration organization |
 | $KLUpdated | Date when registration information about the requested domain was last updated |
-| $KLZone | Color of the zone that queried domain belongs to (red,gray, green) |
+| $KLZone | <ul><li>Color of the zone that queried domain belongs to (red,gray, green)</li><li> Refer to the [Zone Details](#zone-details) section for details </li></ul> |
 | $KLSubdomainsFilesCount | Count of number of sub domains  |
 | $KLRedSubdomains | List of sub-domains belonging to Red Zone |
 | $KLGreenSubdomains | List of sub-domains belonging to Green Zone |
@@ -312,27 +325,20 @@ For instance for contact as Registrant the data for available fields would be
 | $KLRegistrantState  | State of the Registrant present in the DomainWhoIsInfo data |
 
 
-#### Retrieve files accessed by domain and files downloaded from domain
-The domain for which you want to retrieve the report
-- input : The domain to be queried
+#### get_domain_report_file
+This function returns the files accessed by and downloaded by Domain
+#### Input
+- Domain 
+#### Example
 ```
 _fetch $Domain from threatsample limit 1
 >>_lookup kaspersky get_domain_report_file $Domain
 ```
-###### Sample Output   
-[Domain-Report-Files](https://www.youtube.com/watch?v=YqR3KFJm6Mg)  
+#### Output
 
-Note
-
-| Zone        | Description  |
-|:------------- |:-------------|
-| Red | The investigated object can be classified as malicious |
-| Grey |  No data is available for the investigated object |
-| Green | The investigated object cannot be classified as malicious|
-| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
-
-
-The Lookup call returns output in the following structure for available data  
+Click [here](https://drive.google.com/open?id=159HnnKvfFAylQNIltuQ_0tOo2TBNasWb) to view the output of the above example.  
+ 
+The output of the lookup call has the following structure (for the available data)
 
 | Fields        | Description  |
 |:------------- |:-------------|
@@ -346,28 +352,21 @@ The Lookup call returns output in the following structure for available data
 | $KLYellowFileDownloadedMd5 | List of MD5 hashes of files that were downloaded from the requested domain belonging to Yellow Zone |
 
 
-#### Retrieve Hash investigation report
-The hash for which you want to retrieve the report
-- input : The Md5/SHA-1/SHA-256 to be queried
-
+#### get_hash_report
+This function returns investigation report for the queried Hash
+#### Input
+- Hash (Md5/SHA-1/SHA-256)
+#### Example
 ```
 _fetch $Filehash from threatsample limit 1
 >>_lookup kaspersky get_hash_report $Filehash
 ```
-###### Sample Output    
-[Hash-Report](https://www.youtube.com/watch?v=YRyvRcgrA2U)      
 
-Note
+#### Output
 
-| Zone        | Description  |
-|:------------- |:-------------|
-| Red | The investigated object can be classified as malicious |
-| Grey |  No data is available for the investigated object |
-| Green | The investigated object cannot be classified as malicious|
-| Yellow | The investigated object has the Adware and other status (Adware, Pornware, and other programs) |
-
-
-The Lookup call returns output in the following structure for available data  
+Click [here](https://drive.google.com/open?id=1RWo6jJJhaUuMEmA6wiEiw_PkWi0MDPxN) to view the output of the above example.  
+ 
+The output of the lookup call has the following structure (for the available data)
 
 | Fields        | Description  |
 |:------------- |:-------------|
@@ -384,7 +383,7 @@ The Lookup call returns output in the following structure for available data
 | $KLDetectionNames | Name of the detected object |
 | $KLDescriptionURL | Permalink containing description of detected object|
 | $KLFileNames | Name of the file identified by the requested hash |
-| $KLZone | Color of the zone that queried hash belongs to (red,gray, green) |
+| $KLZone | <ul><li>Color of the zone that queried hash belongs to (red,gray, green)</li><li> Refer to the [Zone Details](#zone-details) section for details </li></ul> |
 | $KLRedFileAccessedURL | URLs accessed by the file identified by the requested hash belonging to Red Zone |
 | $KLGreenFileAccessedURL | URLs accessed by the file identified by the requested hash belonging to Green Zone |
 | $KLGreyFileAccessedURL | URLs accessed by the file identified by the requested hash belonging to Grey Zone |
