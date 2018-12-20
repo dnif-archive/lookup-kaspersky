@@ -6,14 +6,17 @@ import datetime
 import os
 import json
 import sys
+import logging
 
 path = os.environ["WORKDIR"]
-with open(path + "/lookup_plugins/kaspersky/dnifconfig.yml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
-    ks_cert_path=path+cfg['lookup_plugin']['KASPERSKY_API_CERT_PATH']
-    ks_cred= b64encode(("{0}:{1}").format(cfg['lookup_plugin']['KASPERSKY_API_USERNAME'],cfg['lookup_plugin']['KASPERSKY_API_PASSWORD']))
-    headers = {'Authorization': 'Basic %s' % ks_cred}
-
+try:
+    with open(path + "/lookup_plugins/kaspersky/dnifconfig.yml", 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
+        ks_cert_path=path+cfg['lookup_plugin']['KASPERSKY_API_CERT_PATH']
+        ks_cred= b64encode(("{0}:{1}").format(cfg['lookup_plugin']['KASPERSKY_API_USERNAME'],cfg['lookup_plugin']['KASPERSKY_API_PASSWORD']))
+        headers = {'Authorization': 'Basic %s' % ks_cred}
+except Exception ,e:
+    logging.warning("Error in reading KasperSky dnifconfig >>{}<<".format(e))
 
 def get_hash_report(inward_array,var_array):
     for i in inward_array:
@@ -23,7 +26,7 @@ def get_hash_report(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+                logging.warning('Api Request Error %s' %e)
             try:
                 if json_response['FileGeneralInfo']['HitsCount'] != None:
                     i['$KLHits']= json_response['FileGeneralInfo']['HitsCount']
@@ -156,7 +159,7 @@ def get_hash_report(inward_array,var_array):
     return inward_array
 
 
-def get_ip_filehostdownload_report(inward_array,var_array):
+def get_ip_report_file(inward_array,var_array):
     for i in inward_array:
         if var_array[0] in i:
             params = 'https://tip.kaspersky.com/api/ip/'+str(i[var_array[0]])+'?sections=FilesDownloadedFromIp,HostedUrls'
@@ -164,7 +167,7 @@ def get_ip_filehostdownload_report(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('KasperSky Api Request Error %s' %e)
             try:
                 hst_urls=[]
                 for hsturl in json_response['HostedUrls']:
@@ -207,7 +210,7 @@ def get_ip_report(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 derived = []
                 drvres = []
@@ -323,7 +326,7 @@ def get_domain_report(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 if json_response['DomainGeneralInfo']['Categories']!=[]:
                     i['$KLCategories'] =list(set(json_response['DomainGeneralInfo']['Categories']))
@@ -552,7 +555,7 @@ def get_domain_report_generalinfo(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 i['$KLCategories'] = json_response['DomainGeneralInfo']['Categories']
             except Exception:
@@ -592,7 +595,7 @@ def get_domain_report_dnsresolution(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 fred=[]
                 fgrey=[]
@@ -628,7 +631,7 @@ def get_domain_report_url(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 fred = []
                 fgrey = []
@@ -688,7 +691,7 @@ def get_domain_report_whois(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 i['$KLCreated']=json_response['DomainWhoIsInfo']['Created']
             except Exception:
@@ -750,7 +753,7 @@ def get_domain_report_whois(inward_array,var_array):
     return inward_array
 
 
-def get_domain_report_files(inward_array,var_array):
+def get_domain_report_file(inward_array,var_array):
     for i in inward_array:
         if var_array[0] in i:
             params = 'https://tip.kaspersky.com/api/domain/'+str(i[var_array[0]])+'?sections=FilesAccessed,FilesDownloaded'
@@ -758,7 +761,7 @@ def get_domain_report_files(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 fred = []
                 fgrey = []
@@ -818,7 +821,7 @@ def get_url_report_file(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 fred = []
                 fgrey = []
@@ -878,7 +881,7 @@ def get_url_report(inward_array,var_array):
                 res = requests.get(params,cert=ks_cert_path,headers=headers)
                 json_response = res.json()
             except Exception, e:
-                print 'Api Request Error %s' %e
+               logging.warning('Api Request Error %s' %e)
             try:
                 i['$KLZone'] = json_response['Zone']
             except Exception:
@@ -898,13 +901,13 @@ def get_url_report(inward_array,var_array):
                     elif zn['Zone'] == 'Yellow':
                         fyellow.append(zn['Url'])
                 if len(fred) > 0:
-                    i['$KLRedURLReferredTo'] = list(set(fred))
+                    i['$KLRedUrlReferredTo'] = list(set(fred))
                 if len(fgreen) > 0:
-                    i['$KLGreenURLReferredTo'] = list(set(fgreen))
+                    i['$KLGreenUrlReferredTo'] = list(set(fgreen))
                 if len(fgrey) > 0:
-                    i['$KLGreyURLReferredTo'] = list(set(fgrey))
+                    i['$KLGreyUrlReferredTo'] = list(set(fgrey))
                 if len(fyellow) > 0:
-                    i['$KLYellowURLReferredTo'] =list(set(fyellow))
+                    i['$KLYellowUrlReferredTo'] =list(set(fyellow))
             except Exception:
                 pass
             try:
